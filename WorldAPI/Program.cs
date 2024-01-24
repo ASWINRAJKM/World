@@ -24,11 +24,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>options.UseSqlServ
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 #endregion
 
-#region Configure Country Dependency Injection
+#region Configure Dependency Injection
+builder.Services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddTransient<ICountryRepository,CountryRepository>();
-#endregion
-
-#region Configure States Dependency Injection
 builder.Services.AddTransient<IStatesRepository, StatesRepository>();
 #endregion
 
