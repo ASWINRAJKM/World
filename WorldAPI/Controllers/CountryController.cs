@@ -14,11 +14,13 @@ namespace WorldAPI.Controllers
     {
         private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
+        private readonly ILogger<CountryController> _logger;
 
-        public CountryController(ICountryRepository countryRepository,IMapper mapper)
+        public CountryController(ICountryRepository countryRepository,IMapper mapper, ILogger<CountryController> logger)
         {
             _countryRepository = countryRepository;
             _mapper = mapper;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -28,12 +30,11 @@ namespace WorldAPI.Controllers
         {
             var countries = await _countryRepository.GetAll();
 
-            var countriesDto = _mapper.Map<List<CountryDto>>(countries);
-
             if (countries == null)
             {
                 return NoContent();
             }
+            var countriesDto = _mapper.Map<List<CountryDto>>(countries);
             return Ok(countriesDto);
         }
 
@@ -42,14 +43,15 @@ namespace WorldAPI.Controllers
         [ProducesResponseType(204)]
         public async Task<ActionResult<CountryDto>> GetById(int id)
         {
-            var country = await _countryRepository.GetById(id);
-
-            var countryDto = _mapper.Map<CountryDto>(country);
+            var country = await _countryRepository.Get(id);
 
             if (country == null)
             {
+                _logger.LogError($"Error while trying to get id {id}");
                 return NoContent();
             }
+
+            var countryDto = _mapper.Map<CountryDto>(country);
             return Ok(countryDto);
         }
 
@@ -58,7 +60,7 @@ namespace WorldAPI.Controllers
         [ProducesResponseType(409)]
         public async Task<ActionResult<CreateCountryDto>> Create([FromBody]CreateCountryDto countryDto)
         {
-            var result = _countryRepository.IsCountryExists(countryDto.Name);
+            var result = _countryRepository.IsRecordExists(x=>x.Name==countryDto.Name);
             if (result) 
             {
                 return Conflict("Country already exists in Database");
@@ -98,7 +100,7 @@ namespace WorldAPI.Controllers
                 return BadRequest();
             }
 
-            var country = await _countryRepository.GetById(id);
+            var country = await _countryRepository.Get(id);
             if (country == null)
             {
                 return NotFound();

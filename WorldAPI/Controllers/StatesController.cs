@@ -27,12 +27,12 @@ namespace WorldAPI.Controllers
         {
             var states = await _statesRepository.GetAll();
 
-            var stateDto = _mapper.Map<List<StatesDto>>(states);
-
             if (states == null)
             {
                 return NoContent();
             }
+
+            var stateDto = _mapper.Map<List<StatesDto>>(states);
             return Ok(stateDto);
         }
 
@@ -41,14 +41,14 @@ namespace WorldAPI.Controllers
         [ProducesResponseType(204)]
         public async Task<ActionResult<StatesDto>> GetById(int id)
         {
-            var states = await _statesRepository.GetById(id);
-
-            var stateDto = _mapper.Map<StatesDto>(states);
+            var states = await _statesRepository.Get(id);
 
             if (states == null)
             {
                 return NoContent();
             }
+
+            var stateDto = _mapper.Map<StatesDto>(states);
             return Ok(stateDto);
         }
 
@@ -57,7 +57,7 @@ namespace WorldAPI.Controllers
         [ProducesResponseType(409)]
         public async Task<ActionResult<CreateStatesDto>> Create([FromBody] CreateStatesDto statesDto)
         {
-            var result = _statesRepository.IsStateExists(statesDto.Name);
+            var result = _statesRepository.IsRecordExists(x=>x.Name==statesDto.Name);
             if (result)
             {
                 return Conflict("States already exists in Database");
@@ -97,7 +97,7 @@ namespace WorldAPI.Controllers
                 return BadRequest();
             }
 
-            var states = await _statesRepository.GetById(id);
+            var states = await _statesRepository.Get(id);
             if (states == null)
             {
                 return NotFound();
