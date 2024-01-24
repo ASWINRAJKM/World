@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using WorldAPI.Data;
 using WorldAPI.Repository.IRepository;
 
@@ -17,24 +18,26 @@ namespace WorldAPI.Repository
             await Save();
         }
 
-        public Task Delete(T entity)
+        public async Task Delete(T entity)
         {
-            throw new NotImplementedException();
+            _dbContext.Remove(entity);
+            await Save();
         }
 
-        public Task<T> Get(int id)
+        public async Task<T> Get(int id)
         {
-            throw new NotImplementedException();
+            return await _dbContext.Set<T>().FindAsync(id);
         }
 
-        public Task<List<T>> GetAll()
+        public async Task<List<T>> GetAll()
         {
-            throw new NotImplementedException();
+            return await _dbContext.Set<T>().ToListAsync();
         }
 
         public bool IsRecordExists(Expression<Func<T, bool>> condition)
         {
-            throw new NotImplementedException();
+            var result = _dbContext.Set<T>().AsQueryable().Where(condition).Any();
+            return result;
         }
 
         public async Task Save()
